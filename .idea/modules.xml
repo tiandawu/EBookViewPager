@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/EBook.iml" filepath="$PROJECT_DIR$/EBook.iml" />
       <module fileurl="file://$PROJECT_DIR$/EBookViewPager.iml" filepath="$PROJECT_DIR$/EBookViewPager.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/bookviewpager/bookviewpager.iml" filepath="$PROJECT_DIR$/bookviewpager/bookviewpager.iml" />
