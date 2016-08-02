@@ -105,7 +105,7 @@ public class BookViewPager extends ViewGroup {
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                mDownX = (int) event.getY();
+                mDownX = (int) event.getX();
                 mDownY = (int) event.getY();
                 mDownTime = System.currentTimeMillis();
                 break;
@@ -124,7 +124,11 @@ public class BookViewPager extends ViewGroup {
         int xDiff = Math.abs((int) event.getX() - mDownX);
         int yDiff = Math.abs((int) event.getY() - mDownY);
         long timeDiff = System.currentTimeMillis() - mDownTime;
-
+//        Log.e("tt", "xDiff = " + xDiff);
+//        Log.e("tt", "yDiff = " + yDiff);
+//        Log.e("tt", "mDownMotionX = " + mDownX);
+//        Log.e("tt", "mDownMotionY = " + mDownY);
+//        Log.e("tt", "timeDiff = " + timeDiff);
         /**
          * 如果不满足下面条件就认为不是点击事件，属于滑动事件
          */

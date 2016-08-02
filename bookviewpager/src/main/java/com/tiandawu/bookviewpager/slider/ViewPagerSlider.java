@@ -1,6 +1,7 @@
 package com.tiandawu.bookviewpager.slider;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -96,17 +97,135 @@ public class ViewPagerSlider extends BaseSlider {
 
     @Override
     public void computeScroll() {
+        if (mScroller.computeScrollOffset()) {
+            if (mLeftScrollerView != null) {
+                mLeftScrollerView.scrollTo(mScroller.getCurrX(), mScroller.getCurrY());
+            }
+
+            if (mRightScrollerView != null) {
+                if (mMoveFirstPage) {
+                    mRightScrollerView.scrollTo(mScroller.getCurrX(), mScroller.getCurrY());
+                } else {
+                    mRightScrollerView.scrollTo(mScroller.getCurrX() - screenWidth, mScroller.getCurrY());
+                }
+                invalidate();
+            }
+            Log.e("tt", "111111");
+        } else if (mScroller.isFinished()) {
+            if (mTouchResult != MOVE_NO_RESULT) {
+                if (mTouchResult == MOVE_TO_LEFT) {
+                    Log.e("tt", "33333333");
+                    moveToNext();
+                } else {
+                    moveToPrevious();
+                    Log.e("tt", "4444444");
+                }
+                mTouchResult = MOVE_NO_RESULT;
+                mBookViewPager.pageScrollStateChanged(MOVE_NO_RESULT);
+                invalidate();
+            }
+            Log.e("tt", "22222");
+        }
 
     }
 
     @Override
     public void slideNext() {
-
+        if (!mAdapter.hasNextContent() || !mScroller.isFinished()) {
+            return;
+        }
+        mLeftScrollerView = getCurrentView();
+        mRightScrollerView = getNextView();
+        mScroller.startScroll(0, 0, screenWidth, 0, 500);
+        mTouchResult = MOVE_TO_LEFT;
+        mBookViewPager.pageScrollStateChanged(MOVE_TO_LEFT);
+        invalidate();
     }
 
     @Override
     public void slidePrevious() {
+        if (!mAdapter.hasPreviousContent() || !mScroller.isFinished()) {
+            return;
+        }
 
+        mLeftScrollerView = getPreviousView();
+        mRightScrollerView = getCurrentView();
+        mScroller.startScroll(screenWidth, 0, -screenWidth, 0, 500);
+        mTouchResult = MOVE_TO_RIGHT;
+        mBookViewPager.pageScrollStateChanged(MOVE_TO_RIGHT);
+        invalidate();
+    }
+
+
+    /**
+     * 移动到下一页
+     *
+     * @return
+     */
+    private boolean moveToNext() {
+        if (!mAdapter.hasNextContent()) {
+            Log.e("tt", "---------");
+            return false;
+        }
+
+        View previousView = mAdapter.getPreviousView();
+        if (previousView != null) {
+            mBookViewPager.removeView(previousView);
+        }
+        View newNextView = previousView;
+        mAdapter.moveToNext();
+        mBookViewPager.pageSelected(mAdapter.getCurrentView());
+        if (mAdapter.hasNextContent()) {
+            if (newNextView != null) {
+                View updateNextView = mAdapter.getView(newNextView, mAdapter.getNextContent());
+                if (updateNextView != newNextView) {
+                    mAdapter.setNextView(updateNextView);
+                    newNextView = updateNextView;
+                }
+            } else {
+                newNextView = mAdapter.getNextView();
+            }
+            newNextView.scrollTo(-screenWidth, 0);
+            mBookViewPager.addView(newNextView);
+        }
+        Log.e("tt", "++++++++");
+
+        return true;
+    }
+
+
+    /**
+     * 移动到上一页
+     *
+     * @return
+     */
+    private boolean moveToPrevious() {
+        if (!mAdapter.hasPreviousContent()) {
+            return false;
+        }
+
+        View nextView = mAdapter.getNextView();
+        if (nextView != null) {
+            mBookViewPager.removeView(nextView);
+        }
+        View newPreviousView = nextView;
+        mAdapter.moveToPrevious();
+        mBookViewPager.pageSelected(mAdapter.getCurrentView());
+
+        if (mAdapter.hasPreviousContent()) {
+            if (newPreviousView != null) {
+                View updatePrevView = mAdapter.getView(newPreviousView, mAdapter.getPreviousContent());
+                if (updatePrevView != newPreviousView) {
+                    mAdapter.setPreviousView(updatePrevView);
+                    newPreviousView = updatePrevView;
+                }
+            } else {
+                newPreviousView = mAdapter.getPreviousView();
+            }
+            newPreviousView.scrollTo(screenWidth, 0);
+            mBookViewPager.addView(newPreviousView);
+        }
+        return true;
     }
 
     @Override
@@ -127,7 +246,7 @@ public class ViewPagerSlider extends BaseSlider {
                     startX = (int) event.getX();
                 }
 
-                int distance = (int) (startX - event.getX());
+                final int distance = startX - (int) event.getX();
                 if (mDirection == MOVE_NO_RESULT) {
                     if (distance > 0) {
                         mDirection = MOVE_TO_LEFT;
@@ -222,19 +341,19 @@ public class ViewPagerSlider extends BaseSlider {
                 int time = 500;
 
                 if (mMoveFirstPage && mRightScrollerView != null) {
-                    int rScrollX = mRightScrollerView.getScrollX();
+                    final int rScrollX = mRightScrollerView.getScrollX();
                     mScroller.startScroll(rScrollX, 0, -rScrollX, 0, time * Math.abs(rScrollX) / screenWidth);
                     mTouchResult = MOVE_NO_RESULT;
                 }
 
                 if (mMoveLastPage && mLeftScrollerView != null) {
-                    int lScrollX = mLeftScrollerView.getScrollX();
+                    final int lScrollX = mLeftScrollerView.getScrollX();
                     mScroller.startScroll(lScrollX, 0, -lScrollX, 0, time * Math.abs(lScrollX) / screenWidth);
                     mTouchResult = MOVE_NO_RESULT;
                 }
 
                 if (!mMoveFirstPage && mMoveLastPage && mLeftScrollerView != null) {
-                    int scrollX = mLeftScrollerView.getScrollX();
+                    final int scrollX = mLeftScrollerView.getScrollX();
                     mVelocityValue = (int) mVelocityTracker.getXVelocity();
 
                     if (mMode == MODE_MOVE && mDirection == MOVE_TO_LEFT) {
@@ -250,6 +369,8 @@ public class ViewPagerSlider extends BaseSlider {
                             mTouchResult = MOVE_NO_RESULT;
                             mScroller.startScroll(scrollX, 0, -scrollX, 0, time);
                         }
+
+                        Log.e("tt", "moveResultL = " + mTouchResult);
                     } else if (mMode == MODE_MOVE && mDirection == MOVE_TO_RIGHT) {
                         if ((screenWidth - scrollX) > limitDistance || mVelocityValue > time) {
                             // 手指向右移动，可以翻屏幕
@@ -263,6 +384,8 @@ public class ViewPagerSlider extends BaseSlider {
                             mTouchResult = MOVE_NO_RESULT;
                             mScroller.startScroll(scrollX, 0, screenWidth - scrollX, 0, time);
                         }
+
+                        Log.e("tt", "moveResultR = " + mTouchResult);
                     }
                 }
                 resetVariables();
