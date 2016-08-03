@@ -1,15 +1,14 @@
-package com.tiandawu.bookviewpager.slider;
+package com.tiandawu.ebook.slider;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.widget.Scroller;
 
-import com.tiandawu.bookviewpager.BookViewPager;
-import com.tiandawu.bookviewpager.BookViewPagerAdapter;
+import com.tiandawu.ebook.BookViewPager;
+import com.tiandawu.ebook.BookViewPagerAdapter;
 
 /**
  * Created by tiandawu on 2016/8/2.
@@ -62,7 +61,7 @@ public class CoverPageSlider extends BaseSlider {
         this.mAdapter = mBookViewPager.getAdapter();
         mScroller = new Scroller(context);
         screenWidth = context.getResources().getDisplayMetrics().widthPixels;
-        limitDistance = screenWidth / 3;
+        limitDistance = screenWidth / 2;
     }
 
     @Override
@@ -101,12 +100,26 @@ public class CoverPageSlider extends BaseSlider {
 
     @Override
     public void slideNext() {
-
+        if (!mAdapter.hasNextContent() || !mScroller.isFinished()) {
+            return;
+        }
+        mScrollerView = mAdapter.getCurrentView();
+        mScroller.startScroll(0, 0, screenWidth, 0, 500);
+        mTouchResult = MOVE_TO_LEFT;
+        mBookViewPager.pageScrollStateChanged(MOVE_TO_LEFT);
+        invalidate();
     }
 
     @Override
     public void slidePrevious() {
-
+        if (!mAdapter.hasPreviousContent() || !mScroller.isFinished()) {
+            return;
+        }
+        mScrollerView = getTopView();
+        mScroller.startScroll(screenWidth, 0, -screenWidth, 0, 500);
+        mTouchResult = MOVE_TO_RIGHT;
+        mBookViewPager.pageScrollStateChanged(MOVE_TO_RIGHT);
+        invalidate();
     }
 
     @Override
@@ -128,14 +141,13 @@ public class CoverPageSlider extends BaseSlider {
                 }
 
                 final int distance = startX - (int) event.getX();
-//                Log.e("tt", "distance = " + distance);
                 if (mDirection == MOVE_NO_RESULT) {
                     if (mAdapter.hasNextContent() && distance > 0) {
+                        //用户左滑
                         mDirection = MOVE_TO_LEFT;
-//                        Log.e("tt", "111111111");
                     } else if (mAdapter.hasPreviousContent() && distance < 0) {
+                        //用户右滑
                         mDirection = MOVE_TO_RIGHT;
-//                        Log.e("tt", "22222222");
                     }
                 }
 
@@ -146,19 +158,23 @@ public class CoverPageSlider extends BaseSlider {
                 }
 
                 if (mMode == MODE_MOVE) {
-//                    Log.e("tt", "mDirection = " + mDirection);
                     if ((mDirection == MOVE_TO_LEFT && distance <= 0)
                             || (mDirection == MOVE_TO_RIGHT && distance >= 0)) {
                         mMode = MODE_NONE;
-//                        Log.e("tt", "????????");
-
+                        /**
+                         * 进入此段逻辑表面，用户操作是：
+                         * 1：按下后，先左滑，接着右滑，并且右滑的距离大于左滑的距离，抬手。
+                         * 2：或者按下后，先右滑，接着作滑，并且左滑的距离大于右滑的距离，抬手。
+                         */
                     }
                 }
 
                 if (mDirection != MOVE_NO_RESULT) {
                     if (mDirection == MOVE_TO_LEFT) {
+                        //如果是左滑，则滑动的是当前View
                         mScrollerView = getCurrentView();
                     } else {
+                        //如果是右滑，则滑动的是上一个View
                         mScrollerView = getTopView();
                     }
 
@@ -170,12 +186,18 @@ public class CoverPageSlider extends BaseSlider {
                             mScrollerView.scrollTo(distance + screenWidth, 0);
                         }
                     } else {
+
+                        /**
+                         * 进入此短逻辑表明：mMode == MODE_NONE
+                         *
+                         */
                         final int scrollX = mScrollerView.getScrollX();
                         if (mDirection == MOVE_TO_LEFT && scrollX != 0 && mAdapter.hasNextContent()) {
+                            //此模式下，将当前滑动的View复位
                             mScrollerView.scrollTo(0, 0);
-                            Log.e("tt", "-------");
                         } else if (mDirection == MOVE_TO_RIGHT && mAdapter.hasPreviousContent()
                                 && screenWidth != Math.abs(scrollX)) {
+                            //此模式下，将当前滑动的View复位
                             mScrollerView.scrollTo(screenWidth, 0);
                         }
                     }
@@ -191,10 +213,9 @@ public class CoverPageSlider extends BaseSlider {
                 final int scrollX = mScrollerView.getScrollX();
 
                 mVelocityValue = (int) velocityTracker.getXVelocity();
-                Log.e("tt", "mVelocityValue = " + mVelocityValue);
                 int time = 500;
                 if (mMode == MODE_MOVE && mDirection == MOVE_TO_LEFT) {
-                    if (scrollX > limitDistance || mVelocityValue < -time) {
+                    if (scrollX >= limitDistance || mVelocityValue < -time) {
                         //说明满足翻屏的条件
                         // 手指向左移动，可以翻屏幕
                         mTouchResult = MOVE_TO_LEFT;
@@ -208,7 +229,7 @@ public class CoverPageSlider extends BaseSlider {
                         mScroller.startScroll(scrollX, 0, -scrollX, 0, time);
                     }
                 } else if (mMode == MODE_MOVE && mDirection == MOVE_TO_RIGHT) {
-                    if ((screenWidth - scrollX) > limitDistance || mVelocityValue > time) {
+                    if ((screenWidth - scrollX) >= limitDistance || mVelocityValue > time) {
                         // 手指向右移动，可以翻屏幕
                         mTouchResult = MOVE_TO_RIGHT;
                         if (mVelocityValue > time) {
@@ -277,17 +298,15 @@ public class CoverPageSlider extends BaseSlider {
             mBookViewPager.removeView(nextView);
         }
         View newPrevView = nextView;
+        mAdapter.moveToPrevious();
         if (mAdapter.hasPreviousContent()) {
-            Log.e("tt", "==========11111===========");
             if (newPrevView != null) {
-                Log.e("tt", "==========2222===========");
                 View updatePrevView = mAdapter.getView(newPrevView, mAdapter.getPreviousContent());
                 if (updatePrevView != newPrevView) {
                     mAdapter.setPreviousView(updatePrevView);
                     newPrevView = updatePrevView;
                 }
             } else {
-                Log.e("tt", "==========33333===========");
                 newPrevView = mAdapter.getPreviousView();
             }
             mBookViewPager.addView(newPrevView);
@@ -320,15 +339,6 @@ public class CoverPageSlider extends BaseSlider {
      */
     private View getCurrentView() {
         return mAdapter.getCurrentView();
-    }
-
-    /**
-     * 获取下面的View
-     *
-     * @return
-     */
-    private View getBottomView() {
-        return mAdapter.getNextView();
     }
 
     /**

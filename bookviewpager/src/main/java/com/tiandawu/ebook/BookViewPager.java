@@ -1,4 +1,4 @@
-package com.tiandawu.bookviewpager;
+package com.tiandawu.ebook;
 
 import android.content.Context;
 import android.os.Parcel;
@@ -10,7 +10,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.tiandawu.bookviewpager.slider.Slider;
+import com.tiandawu.ebook.slider.Slider;
 
 /**
  * Created by tiandawu on 2016/7/31.

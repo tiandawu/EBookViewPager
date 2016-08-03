@@ -2,14 +2,11 @@ package com.tiandawu.ebook;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
 
-import com.tiandawu.bookviewpager.BookViewPager;
-import com.tiandawu.bookviewpager.BookViewPagerAdapter;
-import com.tiandawu.bookviewpager.slider.CoverPageSlider;
+import com.tiandawu.ebook.slider.VerticalPageSlider;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -21,7 +18,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         mBookViewPager = (BookViewPager) findViewById(R.id.bookViewPager);
         mBookViewPager.setAdapter(new MyAdapter());
-        mBookViewPager.setSlider(new CoverPageSlider());
+        mBookViewPager.setSlider(new VerticalPageSlider());
         mBookViewPager.setOnTapListener(new BookViewPager.OnTapListener() {
             @Override
             public void onSingleTap(MotionEvent event) {
@@ -29,8 +26,10 @@ public class MainActivity extends AppCompatActivity {
                 int x = (int) event.getX();
                 if (x > screenWidth / 2) {
                     mBookViewPager.slideNext();
+//                    Log.e("tt", "++++++++");
                 } else if (x <= screenWidth / 2) {
                     mBookViewPager.slidePrevious();
+//                    Log.e("tt", "---------");
                 }
             }
         });
@@ -53,29 +52,31 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public String getCurrentContent() {
+//            Log.e("tt", "getNextContent = " + "第" + index + "页！");
             return "第" + index + "页！";
         }
 
         @Override
         public String getNextContent() {
-            Log.e("tt", "indexNext = " + index);
+//            Log.e("tt", "getNextContent = " + "第" + (index + 1) + "页！");
             return "第" + (index + 1) + "页！";
         }
 
         @Override
         public String getPreviousContent() {
-            Log.e("tt", "indexPrev = " + index);
+//            Log.e("tt", "getPreviousContent = " + "第" + (index - 1) + "页！");
             return "第" + (index - 1) + "页！";
         }
 
         @Override
         public boolean hasNextContent() {
+//            Log.e("tt", "hasNextContent = " + index);
             return index < 10;
         }
 
         @Override
         public boolean hasPreviousContent() {
-            Log.e("tt", "index = " + index);
+//            Log.e("tt", "hasPreviousContent = " + index);
             return index > 0;
         }
 

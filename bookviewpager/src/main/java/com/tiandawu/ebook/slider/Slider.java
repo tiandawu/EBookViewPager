@@ -1,9 +1,9 @@
-package com.tiandawu.bookviewpager.slider;
+package com.tiandawu.ebook.slider;
 
 import android.view.MotionEvent;
 
-import com.tiandawu.bookviewpager.BookViewPager;
-import com.tiandawu.bookviewpager.BookViewPagerAdapter;
+import com.tiandawu.ebook.BookViewPager;
+import com.tiandawu.ebook.BookViewPagerAdapter;
 
 /**
  * Created by tiandawu on 2016/8/1.
@@ -15,6 +15,14 @@ public interface Slider {
      * @param mBookViewPager
      */
     void init(BookViewPager mBookViewPager);
+
+
+    /**
+     * 初始化放置View
+     *
+     * @param mAdapter
+     */
+    void resetFromAdapter(BookViewPagerAdapter mAdapter);
 
     /**
      * 滑动估算
@@ -39,10 +47,4 @@ public interface Slider {
      */
     boolean onTouchEvent(MotionEvent event);
 
-    /**
-     * 重置Adapter
-     *
-     * @param mAdapter
-     */
-    void resetFromAdapter(BookViewPagerAdapter mAdapter);
 }

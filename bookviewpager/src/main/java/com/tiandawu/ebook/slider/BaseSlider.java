@@ -1,4 +1,4 @@
-package com.tiandawu.bookviewpager.slider;
+package com.tiandawu.ebook.slider;
 
 /**
  * Created by tiandawu on 2016/8/1.

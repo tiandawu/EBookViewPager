@@ -1,15 +1,14 @@
-package com.tiandawu.bookviewpager.slider;
+package com.tiandawu.ebook.slider;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.widget.Scroller;
 
-import com.tiandawu.bookviewpager.BookViewPager;
-import com.tiandawu.bookviewpager.BookViewPagerAdapter;
+import com.tiandawu.ebook.BookViewPager;
+import com.tiandawu.ebook.BookViewPagerAdapter;
 
 /**
  * Created by tiandawu on 2016/8/1.
@@ -20,12 +19,21 @@ import com.tiandawu.bookviewpager.BookViewPagerAdapter;
  */
 public class ViewPagerSlider extends BaseSlider {
 
+    /**
+     * 手指按下的位置
+     */
     private int startX;
+    /**
+     * 屏幕的宽度
+     */
     private int screenWidth;
     /**
-     * 商定这个滑动是否有效的距离
+     * 移动的限制距离
      */
     private int limitDistance = 0;
+    /**
+     * 速率值
+     */
     private int mVelocityValue = 0;
     /**
      * 最后触摸的结果方向
@@ -42,6 +50,9 @@ public class ViewPagerSlider extends BaseSlider {
     private int mMode = MODE_NONE;
 
 
+    /**
+     * 移动的是否是最后一页或者第一页
+     */
     private boolean mMoveLastPage, mMoveFirstPage;
 
     private Context mContext;
@@ -56,24 +67,25 @@ public class ViewPagerSlider extends BaseSlider {
     private View mLeftScrollerView = null;
     private View mRightScrollerView = null;
 
-
-    private BookViewPagerAdapter getAdapter() {
-        return mBookViewPager.getAdapter();
-    }
-
+    /**
+     * 初始化
+     */
     @Override
     public void init(BookViewPager mBookViewPager) {
         this.mBookViewPager = mBookViewPager;
         mContext = mBookViewPager.getContext();
         if (mAdapter == null) {
-            mAdapter = getAdapter();
+            mAdapter = mBookViewPager.getAdapter();
         }
         mScroller = new Scroller(mContext);
         screenWidth = mContext.getResources().getDisplayMetrics().widthPixels;
-        limitDistance = screenWidth / 3;
+        limitDistance = screenWidth / 2;
     }
 
 
+    /**
+     * 放置View
+     */
     @Override
     public void resetFromAdapter(BookViewPagerAdapter mAdapter) {
         View curView = mAdapter.getUpdatedCurrentView();
@@ -110,21 +122,17 @@ public class ViewPagerSlider extends BaseSlider {
                 }
                 invalidate();
             }
-            Log.e("tt", "111111");
         } else if (mScroller.isFinished()) {
             if (mTouchResult != MOVE_NO_RESULT) {
                 if (mTouchResult == MOVE_TO_LEFT) {
-                    Log.e("tt", "33333333");
                     moveToNext();
                 } else {
                     moveToPrevious();
-                    Log.e("tt", "4444444");
                 }
                 mTouchResult = MOVE_NO_RESULT;
                 mBookViewPager.pageScrollStateChanged(MOVE_NO_RESULT);
                 invalidate();
             }
-            Log.e("tt", "22222");
         }
 
     }
@@ -147,7 +155,6 @@ public class ViewPagerSlider extends BaseSlider {
         if (!mAdapter.hasPreviousContent() || !mScroller.isFinished()) {
             return;
         }
-
         mLeftScrollerView = getPreviousView();
         mRightScrollerView = getCurrentView();
         mScroller.startScroll(screenWidth, 0, -screenWidth, 0, 500);
@@ -164,7 +171,6 @@ public class ViewPagerSlider extends BaseSlider {
      */
     private boolean moveToNext() {
         if (!mAdapter.hasNextContent()) {
-            Log.e("tt", "---------");
             return false;
         }
 
@@ -185,11 +191,9 @@ public class ViewPagerSlider extends BaseSlider {
             } else {
                 newNextView = mAdapter.getNextView();
             }
-            newNextView.scrollTo(-screenWidth, 0);
             mBookViewPager.addView(newNextView);
+            newNextView.scrollTo(-screenWidth, 0);
         }
-        Log.e("tt", "++++++++");
-
         return true;
     }
 
@@ -222,8 +226,8 @@ public class ViewPagerSlider extends BaseSlider {
             } else {
                 newPreviousView = mAdapter.getPreviousView();
             }
-            newPreviousView.scrollTo(screenWidth, 0);
             mBookViewPager.addView(newPreviousView);
+            newPreviousView.scrollTo(screenWidth, 0);
         }
         return true;
     }
@@ -247,6 +251,15 @@ public class ViewPagerSlider extends BaseSlider {
                 }
 
                 final int distance = startX - (int) event.getX();
+
+                /**
+                 * 如果滑动的View是第一页且是向右滑动，或则滑动的View是最后一页且是向左滑动，
+                 * 则不让用户的滑动事件生效。
+                 */
+                if ((!mAdapter.hasPreviousContent() && distance < 0) || (!mAdapter.hasNextContent() && distance > 0)) {
+                    return false;
+                }
+
                 if (mDirection == MOVE_NO_RESULT) {
                     if (distance > 0) {
                         mDirection = MOVE_TO_LEFT;
@@ -271,6 +284,11 @@ public class ViewPagerSlider extends BaseSlider {
                     if ((mDirection == MOVE_TO_LEFT && distance <= 0)
                             || (mDirection == MOVE_TO_RIGHT && distance >= 0)) {
                         mMode = MODE_NONE;
+                        /**
+                         * 进入此段逻辑表面，用户操作是：
+                         * 1：按下后，先左滑，接着右滑，并且右滑的距离大于左滑的距离，抬手。
+                         * 2：或者按下后，先右滑，接着作滑，并且左滑的距离大于右滑的距离，抬手。
+                         */
                     }
                 }
 
@@ -294,20 +312,11 @@ public class ViewPagerSlider extends BaseSlider {
                     if (mMode == MODE_MOVE) {
                         mVelocityTracker.computeCurrentVelocity(1000, ViewConfiguration.getMaximumFlingVelocity());
                         if (mDirection == MOVE_TO_LEFT) {
-                            if (mMoveLastPage) {
-                                //如果已经到最后一页，则仍可以滑动一点距离，类似弹性效果
-                                mLeftScrollerView.scrollTo(distance / 2, 0);
-                            } else {
-                                mLeftScrollerView.scrollTo(distance, 0);
-                                mRightScrollerView.scrollTo(-screenWidth + distance, 0);
-                            }
+                            mLeftScrollerView.scrollTo(distance, 0);
+                            mRightScrollerView.scrollTo(-screenWidth + distance, 0);
                         } else {
-                            if (mMoveFirstPage) {
-                                mRightScrollerView.scrollTo(distance / 2, 0);
-                            } else {
-                                mRightScrollerView.scrollTo(distance, 0);
-                                mLeftScrollerView.scrollTo(screenWidth + distance, 0);
-                            }
+                            mRightScrollerView.scrollTo(distance, 0);
+                            mLeftScrollerView.scrollTo(screenWidth + distance, 0);
                         }
                     } else {
                         int scrollX = 0;
@@ -352,10 +361,9 @@ public class ViewPagerSlider extends BaseSlider {
                     mTouchResult = MOVE_NO_RESULT;
                 }
 
-                if (!mMoveFirstPage && mMoveLastPage && mLeftScrollerView != null) {
+                if (!mMoveFirstPage && !mMoveLastPage && mLeftScrollerView != null) {
                     final int scrollX = mLeftScrollerView.getScrollX();
                     mVelocityValue = (int) mVelocityTracker.getXVelocity();
-
                     if (mMode == MODE_MOVE && mDirection == MOVE_TO_LEFT) {
                         if (scrollX > limitDistance || mVelocityValue < -time) {
                             // 手指向左移动，可以翻屏幕
@@ -370,7 +378,6 @@ public class ViewPagerSlider extends BaseSlider {
                             mScroller.startScroll(scrollX, 0, -scrollX, 0, time);
                         }
 
-                        Log.e("tt", "moveResultL = " + mTouchResult);
                     } else if (mMode == MODE_MOVE && mDirection == MOVE_TO_RIGHT) {
                         if ((screenWidth - scrollX) > limitDistance || mVelocityValue > time) {
                             // 手指向右移动，可以翻屏幕
@@ -385,7 +392,6 @@ public class ViewPagerSlider extends BaseSlider {
                             mScroller.startScroll(scrollX, 0, screenWidth - scrollX, 0, time);
                         }
 
-                        Log.e("tt", "moveResultR = " + mTouchResult);
                     }
                 }
                 resetVariables();

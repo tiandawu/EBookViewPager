@@ -1,4 +1,4 @@
-package com.tiandawu.bookviewpager;
+package com.tiandawu.ebook;
 
 import android.os.Bundle;
 import android.os.Parcelable;
