@@ -3,7 +3,7 @@ package com.tiandawu.ebook.slider;
 /**
  * Created by tiandawu on 2016/8/1.
  */
-public abstract class BaseSlider implements Slider {
+public abstract class BaseSlider  implements Slider {
 
     /**
      * 手指移动的方向
@@ -17,4 +17,5 @@ public abstract class BaseSlider implements Slider {
      */
     static final int MODE_NONE = 0;
     static final int MODE_MOVE = 1;
+
 }

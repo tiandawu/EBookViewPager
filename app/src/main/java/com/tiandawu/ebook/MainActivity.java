@@ -1,12 +1,15 @@
 package com.tiandawu.ebook;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.TextView;
 
-import com.tiandawu.ebook.slider.VerticalPageSlider;
+import com.tiandawu.ebook.slider.ViewPagerSlider;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -15,10 +18,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        hideStatusBar(this);
         setContentView(R.layout.activity_main);
         mBookViewPager = (BookViewPager) findViewById(R.id.bookViewPager);
         mBookViewPager.setAdapter(new MyAdapter());
-        mBookViewPager.setSlider(new VerticalPageSlider());
+        mBookViewPager.setSlider(new ViewPagerSlider());
         mBookViewPager.setOnTapListener(new BookViewPager.OnTapListener() {
             @Override
             public void onSingleTap(MotionEvent event) {
@@ -90,5 +95,17 @@ public class MainActivity extends AppCompatActivity {
             --index;
         }
     }
+
+    /**
+     * 隐藏状态栏
+     *
+     * @param activity
+     */
+    private void hideStatusBar(Activity activity) {
+        activity.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        activity.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+    }
+
 
 }
