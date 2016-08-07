@@ -3,13 +3,14 @@ package com.tiandawu.ebook;
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
 
-import com.tiandawu.ebook.slider.ViewPagerSlider;
+import com.tiandawu.ebook.slider.VerticalPageSlider;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -23,7 +24,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         mBookViewPager = (BookViewPager) findViewById(R.id.bookViewPager);
         mBookViewPager.setAdapter(new MyAdapter());
-        mBookViewPager.setSlider(new ViewPagerSlider());
+        mBookViewPager.setSlider(new VerticalPageSlider());
         mBookViewPager.setOnTapListener(new BookViewPager.OnTapListener() {
             @Override
             public void onSingleTap(MotionEvent event) {
@@ -75,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public boolean hasNextContent() {
-//            Log.e("tt", "hasNextContent = " + index);
+            Log.e("tt", "hasNextContent = " + index);
             return index < 10;
         }
 
