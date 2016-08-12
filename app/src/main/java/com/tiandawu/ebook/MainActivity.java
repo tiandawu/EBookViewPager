@@ -76,8 +76,8 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public boolean hasNextContent() {
-            Log.e("tt", "hasNextContent = " + index);
-            return index < 10;
+//            Log.e("tt", "hasNextContent = " + index);
+            return index < 2;
         }
 
         @Override
@@ -89,11 +89,13 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void computeNext() {
             ++index;
+            Log.e("tt", "computeNext = " + index);
         }
 
         @Override
         protected void computePrevious() {
             --index;
+            Log.e("tt", "computePrevious = " + index);
         }
     }
 
