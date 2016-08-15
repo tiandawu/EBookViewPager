@@ -2,6 +2,7 @@ package com.tiandawu.ebook.slider;
 
 import android.content.Context;
 import android.graphics.Rect;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Scroller;
@@ -15,6 +16,9 @@ import com.tiandawu.ebook.BookViewPagerAdapter;
 public class VerticalPageSlider extends BaseSlider {
 
     private int startY;
+    private int downY;
+    private int distance;
+    private int moveAllDistance;
     private int moveUpAllDistance;
     private int moveDownAllDistance;
     private int screenHeight;
@@ -30,10 +34,11 @@ public class VerticalPageSlider extends BaseSlider {
     private View mScrollerNextView;//跟随当前伴随滑动的nextView
 
     /**
-     * 用于标记是否像上滑动或者像下滑动过
+     * 用于标记是否向上滑动或者向下滑动过
      */
     private boolean isTopMove = false;
     private boolean isBottomMove = false;
+    private boolean isDown = false;
     private Rect mVisiablRect = new Rect();
 
 
@@ -91,8 +96,14 @@ public class VerticalPageSlider extends BaseSlider {
                     break;
                 }
                 startY = (int) event.getY();
+                downY = (int) event.getY();
                 break;
             case MotionEvent.ACTION_MOVE:
+//                Log.e("tt", "Y = " + event.getY());
+
+//                if ((int) event.getY() >= screenHeight || (int) event.getY() <= 0) {
+//                    return false;
+//                }
 
                 if (!mScroller.isFinished()) {
                     return false;
@@ -100,14 +111,16 @@ public class VerticalPageSlider extends BaseSlider {
                 if (startY == 0) {
                     startY = (int) event.getY();
                 }
-
                 int deltaY = startY - (int) event.getY();
-
+//                Log.e("tt", "deltaY =  " + deltaY);
 
                 /**
                  * 向上滑动
                  */
                 if (deltaY > 0) {
+                    mMode = MOVE_TO_TOP;
+                    isTopMove = true;
+                    moveDownAllDistance = 0;
 //                    Log.e("tt", "ttttttttttttttttttt ");
 //                    isTopMove = true;
 //                    if (isBottomMove) {
@@ -128,9 +141,26 @@ public class VerticalPageSlider extends BaseSlider {
                         mScrollerPrevView = null;
                     }
 
+//                    Log.e("tt", "mScrollerCurView = " + mScrollerCurView);
+//                    Log.e("tt", "mScrollerNextView = " + mScrollerNextView);
+//                    Log.e("tt", "mScrollerPrevView = " + mScrollerPrevView);
+
+//                    if (!mAdapter.hasNextContent() && mMode == MOVE_TO_TOP && (mVisiablRect.top + deltaY) >= 0) {
+//                        moveAllDistance = 0;
+//                        Log.e("tt", "moveAllDistance - " + moveAllDistance);
+//                        return false;
+//                    }
 
                     if (!mAdapter.hasNextContent()) {
+//                        Log.e("tt", "-----------");
+
                         mScrollerCurView.getLocalVisibleRect(mVisiablRect);
+                        if (mVisiablRect.top == 0) {
+                            moveAllDistance = 0;
+//                            Log.e("tt", "-------------------------");
+                            return false;
+                        }
+
 //                        Log.e("tt", "top = " + mVisiablRect.top);
 //                        Log.e("tt", "botoom = " + mVisiablRect.bottom);
                         if (mVisiablRect.top < 0) {
@@ -145,18 +175,45 @@ public class VerticalPageSlider extends BaseSlider {
                             if (mScrollerPrevView != null) {
                                 mScrollerPrevView.scrollBy(0, deltaY);
                             }
+                            moveAllDistance += deltaY;
+//                            Log.e("tt", "moveAllDistance = " + moveAllDistance);
                         }
                         startY = (int) event.getY();
-//                        moveUpAllDistance = 0;
-//                        moveDownAllDistance = 0;
-                        return false;
-                    }
-                    moveUpAllDistance += deltaY;
-//                    Log.e("tt", "moveUpAllDistance = " + moveUpAllDistance);
+//                        Log.e("tt", "top ====== " + mVisiablRect.top);
 
-                    if (moveUpAllDistance >= screenHeight) {
-                        moveUpAllDistance %= screenHeight;
+                        return true;
+                    }
+
+
+                    moveUpAllDistance += deltaY;
+                    moveAllDistance += deltaY;
+                    Log.e("tt", "moveAllDistance = " + moveAllDistance);
+                    if (moveAllDistance >= screenHeight) {
+//                        Log.e("tt", "moveUpAllDistance = " + moveUpAllDistance);
+//                        Log.e("tt", "moveDownAllDistance = " + moveDownAllDistance);
+
+//                        if (distance != 0) {
+//                            moveUpAllDistance += distance;
+//                        }
+                        moveAllDistance %= screenHeight;
                         moveToNext();
+                        if (!mAdapter.hasNextContent()) {
+                            Log.e("tt", "deltaY = " + deltaY);
+                            Log.e("tt", "moveAllDistance = " + moveAllDistance);
+                            Log.e("tt", "deltaY -moveAllDistance =  " + (deltaY - moveAllDistance));
+                            deltaY = deltaY - moveAllDistance;
+                            mScrollerCurView.scrollBy(0, deltaY);
+                            if (mScrollerNextView != null) {
+                                mScrollerNextView.scrollBy(0, deltaY);
+                            }
+
+                            if (mScrollerPrevView != null) {
+                                mScrollerPrevView.scrollBy(0, deltaY);
+                            }
+                            moveAllDistance = 0;
+                            Log.e("tt", "-------------------------");
+                            return true;
+                        }
                     }
 //                    Log.e("tt", "moveUpAllDistance =========== " + moveUpAllDistance);
                     if (mAdapter.hasNextContent()) {
@@ -170,23 +227,15 @@ public class VerticalPageSlider extends BaseSlider {
                         }
                     }
 
-                    if (!mAdapter.hasNextContent()) {
-                        deltaY = deltaY - moveUpAllDistance;
-                        mScrollerCurView.scrollBy(0, deltaY);
-                        if (mScrollerNextView != null) {
-                            mScrollerNextView.scrollBy(0, deltaY);
-                        }
-
-                        if (mScrollerPrevView != null) {
-                            mScrollerPrevView.scrollBy(0, deltaY);
-                        }
-                    }
                 }
 
                 /**
                  * 向下滑动
                  */
                 if (deltaY < 0) {
+                    mMode = MOVE_TO_BOTTOM;
+                    isBottomMove = true;
+                    moveUpAllDistance = 0;
 //                    Log.e("tt", "bbbbbbbbbbbbbbbbbbbb ");
 //                    isBottomMove = true;
 //                    if (isTopMove) {
@@ -208,10 +257,30 @@ public class VerticalPageSlider extends BaseSlider {
                     }
 
 
+//                    Log.e("tt", "mScrollerCurView = " + mScrollerCurView);
+//                    Log.e("tt", "mScrollerNextView = " + mScrollerNextView);
+//                    Log.e("tt", "mScrollerPrevView = " + mScrollerPrevView);
+
+
+//                    if (!mAdapter.hasPreviousContent() && mMode == MOVE_TO_BOTTOM && (mVisiablRect.top + deltaY) <= 0) {
+//                        moveAllDistance = 0;
+//                        Log.e("tt", "moveAllDistance ---------- " + moveAllDistance);
+//                        return false;
+//                    }
+
+
                     if (!mAdapter.hasPreviousContent()) {
+//                        Log.e("tt", "+++++++++++++++");
                         mScrollerCurView.getLocalVisibleRect(mVisiablRect);
+                        if (mVisiablRect.top == 0) {
+                            moveAllDistance = 0;
+//                            Log.e("tt", "++++++++++++++++++++++");
+                            return false;
+                        }
+
                         if (mVisiablRect.top > 0) {
                             if ((mVisiablRect.top + deltaY) <= 0) {
+                                Log.e("tt", "deltaY = " + (-mVisiablRect.top));
                                 deltaY = -mVisiablRect.top;
                             }
                             mScrollerCurView.scrollBy(0, deltaY);
@@ -222,16 +291,45 @@ public class VerticalPageSlider extends BaseSlider {
                             if (mScrollerNextView != null) {
                                 mScrollerNextView.scrollBy(0, deltaY);
                             }
+
+                            moveAllDistance += deltaY;
+//                            Log.e("tt", "moveAllDistance ========= " + moveAllDistance);
+
                         }
                         startY = (int) event.getY();
-//                        moveUpAllDistance = 0;
-//                        moveDownAllDistance = 0;
-                        return false;
+//                        Log.e("tt", "top = " + mVisiablRect.top);
+
+//                        Log.e("tt", "moveAllDistance = " + moveAllDistance);
+                        return true;
                     }
+
+//                    Log.e("tt", "?????????????");
                     moveDownAllDistance += deltaY;
-                    if (moveDownAllDistance < -screenHeight) {
-                        moveDownAllDistance %= screenHeight;
+                    moveAllDistance += deltaY;
+
+                    Log.e("tt", "moveAllDistance ========= " + moveAllDistance);
+                    if (moveAllDistance <= -screenHeight) {
+//                        Log.e("tt", "moveUpAllDistance ===== " + moveUpAllDistance);
+//                        Log.e("tt", "moveDownAllDistance ===== " + moveDownAllDistance);
+//                        if (distance != 0) {
+//                            moveDownAllDistance += distance;
+//                        }
+                        moveAllDistance %= screenHeight;
                         moveToPrevious();
+                        if (!mAdapter.hasPreviousContent()) {
+                            deltaY = deltaY - moveAllDistance;
+                            mScrollerCurView.scrollBy(0, deltaY);
+                            if (mScrollerPrevView != null) {
+                                mScrollerPrevView.scrollBy(0, deltaY);
+                            }
+
+                            if (mScrollerNextView != null) {
+                                mScrollerNextView.scrollBy(0, deltaY);
+                            }
+                            Log.e("tt", "++++++++++++++++++++");
+                            moveAllDistance = 0;
+                            return true;
+                        }
                     }
 
 
@@ -245,25 +343,22 @@ public class VerticalPageSlider extends BaseSlider {
                             mScrollerNextView.scrollBy(0, deltaY);
                         }
                     }
-
-                    if (!mAdapter.hasPreviousContent()) {
-                        deltaY = deltaY - moveDownAllDistance;
-                        mScrollerCurView.scrollBy(0, deltaY);
-                        if (mScrollerPrevView != null) {
-                            mScrollerPrevView.scrollBy(0, deltaY);
-                        }
-
-                        if (mScrollerNextView != null) {
-                            mScrollerNextView.scrollBy(0, deltaY);
-                        }
-                    }
-
                 }
-
                 startY = (int) event.getY();
 
                 break;
             case MotionEvent.ACTION_UP:
+//                Log.e("tt", "moveUpAllDistance = " + moveUpAllDistance);
+//                Log.e("tt", "moveDownAllDistance = " + moveDownAllDistance);
+                distance = 0;
+                if (isTopMove && isBottomMove) {
+                    distance = downY - (int) event.getY();
+                }
+
+                isTopMove = false;
+                isBottomMove = false;
+//                Log.e("tt", "moveAllDistance = " + moveAllDistance);
+//                Log.e("tt", "distance = " + ((int) event.getY() - downY));
 //                Log.e("tt", "moveUpAllDistance = " + moveUpAllDistance);
 //                Log.e("tt", "moveDownAllDistance = " + moveDownAllDistance);
                 break;
@@ -300,7 +395,7 @@ public class VerticalPageSlider extends BaseSlider {
                 newNextView = mAdapter.getNextView();
             }
             mBookViewPager.addView(newNextView);
-            newNextView.scrollTo(0, -screenHeight + moveUpAllDistance);
+            newNextView.scrollTo(0, -screenHeight + moveAllDistance);
         }
         return true;
     }
@@ -335,7 +430,7 @@ public class VerticalPageSlider extends BaseSlider {
                 newPreviousView = mAdapter.getPreviousView();
             }
             mBookViewPager.addView(newPreviousView);
-            newPreviousView.scrollTo(0, screenHeight + moveDownAllDistance);
+            newPreviousView.scrollTo(0, screenHeight + moveAllDistance);
         }
         return true;
     }

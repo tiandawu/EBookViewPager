@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public boolean hasNextContent() {
 //            Log.e("tt", "hasNextContent = " + index);
-            return index < 2;
+            return index < 3;
         }
 
         @Override

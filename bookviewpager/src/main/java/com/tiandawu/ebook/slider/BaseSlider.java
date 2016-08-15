@@ -10,8 +10,8 @@ public abstract class BaseSlider implements Slider {
      */
     public static final int MOVE_TO_LEFT = 0;  // Move to next
     public static final int MOVE_TO_RIGHT = 1; // Move to previous
-//    public static final int MOVE_TO_TOP = 3; // Move to top
-//    public static final int MOVE_TO_BOTTOM = 4; // Move to bottom
+    public static final int MOVE_TO_TOP = 3; // Move to top
+    public static final int MOVE_TO_BOTTOM = 4; // Move to bottom
 
     public static final int MOVE_NO_RESULT = 2;
 
