@@ -38,6 +38,7 @@ public class VerticalPageSlider extends BaseSlider {
      */
     private boolean isTopMove = false;
     private boolean isBottomMove = false;
+    private boolean isToBottom = false;
     private boolean isDown = false;
     private Rect mVisiablRect = new Rect();
 
@@ -118,15 +119,10 @@ public class VerticalPageSlider extends BaseSlider {
                  * 向上滑动
                  */
                 if (deltaY > 0) {
-                    mMode = MOVE_TO_TOP;
-                    isTopMove = true;
-                    moveDownAllDistance = 0;
-//                    Log.e("tt", "ttttttttttttttttttt ");
+//                    mMode = MOVE_TO_TOP;
 //                    isTopMove = true;
-//                    if (isBottomMove) {
-//                        isBottomMove = false;
-//                        return false;
-//                    }
+//                    moveDownAllDistance = 0;
+
                     mScrollerCurView = mAdapter.getCurrentView();
                     if (mAdapter.hasNextContent()) {
                         mScrollerNextView = mAdapter.getNextView();
@@ -141,27 +137,19 @@ public class VerticalPageSlider extends BaseSlider {
                         mScrollerPrevView = null;
                     }
 
-//                    Log.e("tt", "mScrollerCurView = " + mScrollerCurView);
-//                    Log.e("tt", "mScrollerNextView = " + mScrollerNextView);
-//                    Log.e("tt", "mScrollerPrevView = " + mScrollerPrevView);
 
-//                    if (!mAdapter.hasNextContent() && mMode == MOVE_TO_TOP && (mVisiablRect.top + deltaY) >= 0) {
-//                        moveAllDistance = 0;
-//                        Log.e("tt", "moveAllDistance - " + moveAllDistance);
-//                        return false;
-//                    }
 
                     if (!mAdapter.hasNextContent()) {
-//                        Log.e("tt", "-----------");
 
                         mScrollerCurView.getLocalVisibleRect(mVisiablRect);
-                        if (mVisiablRect.top == 0) {
+                        if ((mVisiablRect.top % screenHeight) == 0) {
                             moveAllDistance = 0;
-//                            Log.e("tt", "-------------------------");
+                            Log.e("tt", "--------------1111111-----------");
                             return false;
                         }
-
+//                        Log.e("tt", "mScrollerCurView = " + mScrollerCurView);
 //                        Log.e("tt", "top = " + mVisiablRect.top);
+//                        Log.e("tt", "deltaY = " + deltaY);
 //                        Log.e("tt", "botoom = " + mVisiablRect.bottom);
                         if (mVisiablRect.top < 0) {
                             if ((mVisiablRect.top + deltaY) >= 0) {
@@ -179,13 +167,13 @@ public class VerticalPageSlider extends BaseSlider {
 //                            Log.e("tt", "moveAllDistance = " + moveAllDistance);
                         }
                         startY = (int) event.getY();
-//                        Log.e("tt", "top ====== " + mVisiablRect.top);
+                        Log.e("tt", "top ====== " + mVisiablRect.top);
 
                         return true;
                     }
 
 
-                    moveUpAllDistance += deltaY;
+//                    moveUpAllDistance += deltaY;
                     moveAllDistance += deltaY;
                     Log.e("tt", "moveAllDistance = " + moveAllDistance);
                     if (moveAllDistance >= screenHeight) {
@@ -195,13 +183,35 @@ public class VerticalPageSlider extends BaseSlider {
 //                        if (distance != 0) {
 //                            moveUpAllDistance += distance;
 //                        }
+
                         moveAllDistance %= screenHeight;
                         moveToNext();
                         if (!mAdapter.hasNextContent()) {
                             Log.e("tt", "deltaY = " + deltaY);
                             Log.e("tt", "moveAllDistance = " + moveAllDistance);
-                            Log.e("tt", "deltaY -moveAllDistance =  " + (deltaY - moveAllDistance));
                             deltaY = deltaY - moveAllDistance;
+                            Log.e("tt", "deltaY -moveAllDistance =  " + deltaY);
+                            mScrollerCurView = mAdapter.getCurrentView();
+//                            if (mAdapter.hasNextContent()) {
+//                                mScrollerNextView = mAdapter.getNextView();
+//                            } else {
+//                                mScrollerNextView = null;
+//                            }
+//
+//                            if (mAdapter.hasPreviousContent()) {
+//                                mScrollerPrevView = mAdapter.getPreviousView();
+//                            } else {
+//                                mScrollerPrevView = null;
+//                            }
+//
+//                            mScrollerCurView.getLocalVisibleRect(mVisiablRect);
+//                            Log.e("tt", "mScrollerCurView ===== " + mScrollerCurView);
+
+//                            if (mVisiablRect.top > 0) {
+//                                return false;
+//                            }
+                            Log.e("tt", "mVisiablRect_top = " + mVisiablRect.top);
+                            Log.e("tt", "mVisiablRect_bottom = " + mVisiablRect.bottom);
                             mScrollerCurView.scrollBy(0, deltaY);
                             if (mScrollerNextView != null) {
                                 mScrollerNextView.scrollBy(0, deltaY);
@@ -211,12 +221,43 @@ public class VerticalPageSlider extends BaseSlider {
                                 mScrollerPrevView.scrollBy(0, deltaY);
                             }
                             moveAllDistance = 0;
+                            isToBottom = true;
+                            mScrollerCurView = mAdapter.getCurrentView();
+
+                            Log.e("tt", "mVisiablRect_top = " + mVisiablRect.top);
+                            Log.e("tt", "mVisiablRect_bottom = " + mVisiablRect.bottom);
                             Log.e("tt", "-------------------------");
                             return true;
                         }
                     }
 //                    Log.e("tt", "moveUpAllDistance =========== " + moveUpAllDistance);
                     if (mAdapter.hasNextContent()) {
+
+
+//
+//                        mScrollerCurView = mAdapter.getCurrentView();
+//                        if (mAdapter.hasNextContent()) {
+//                            mScrollerNextView = mAdapter.getNextView();
+//                        } else {
+//                            mScrollerNextView = null;
+//                        }
+//
+//
+//                        if (mAdapter.hasPreviousContent()) {
+//                            mScrollerPrevView = mAdapter.getPreviousView();
+//                        } else {
+//                            mScrollerPrevView = null;
+//                        }
+//                        if (mVisiablRect.top > screenHeight) {
+//                            moveToNext();
+//                        }
+
+//                        if (!mAdapter.hasNextContent()) {
+//                            mScrollerCurView = mAdapter.getCurrentView();
+//                            mScrollerCurView.getLocalVisibleRect(mVisiablRect);
+//                            deltaY = deltaY - mVisiablRect.top;
+//                        }
+
                         mScrollerCurView.scrollBy(0, deltaY);
                         if (mScrollerNextView != null) {
                             mScrollerNextView.scrollBy(0, deltaY);
@@ -225,6 +266,12 @@ public class VerticalPageSlider extends BaseSlider {
                         if (mScrollerPrevView != null) {
                             mScrollerPrevView.scrollBy(0, deltaY);
                         }
+//                        mScrollerCurView.getLocalVisibleRect(mVisiablRect);
+
+
+                        Log.e("tt", "mVisiablRect_top = " + mVisiablRect.top);
+                        Log.e("tt", "mVisiablRect_bottom = " + mVisiablRect.bottom);
+                        Log.e("tt", "++++++++++++++++++++++   " + moveAllDistance);
                     }
 
                 }
@@ -272,7 +319,7 @@ public class VerticalPageSlider extends BaseSlider {
                     if (!mAdapter.hasPreviousContent()) {
 //                        Log.e("tt", "+++++++++++++++");
                         mScrollerCurView.getLocalVisibleRect(mVisiablRect);
-                        if (mVisiablRect.top == 0) {
+                        if ((mVisiablRect.top % screenHeight) == 0) {
                             moveAllDistance = 0;
 //                            Log.e("tt", "++++++++++++++++++++++");
                             return false;
@@ -307,7 +354,7 @@ public class VerticalPageSlider extends BaseSlider {
                     moveDownAllDistance += deltaY;
                     moveAllDistance += deltaY;
 
-                    Log.e("tt", "moveAllDistance ========= " + moveAllDistance);
+//                    Log.e("tt", "moveAllDistance ========= " + moveAllDistance);
                     if (moveAllDistance <= -screenHeight) {
 //                        Log.e("tt", "moveUpAllDistance ===== " + moveUpAllDistance);
 //                        Log.e("tt", "moveDownAllDistance ===== " + moveDownAllDistance);
@@ -318,6 +365,27 @@ public class VerticalPageSlider extends BaseSlider {
                         moveToPrevious();
                         if (!mAdapter.hasPreviousContent()) {
                             deltaY = deltaY - moveAllDistance;
+//
+//                            mScrollerCurView = mAdapter.getCurrentView();
+//                            if (mAdapter.hasNextContent()) {
+//                                mScrollerNextView = mAdapter.getNextView();
+//                            } else {
+//                                mScrollerNextView = null;
+//                            }
+//
+//                            if (mAdapter.hasPreviousContent()) {
+//                                mScrollerPrevView = mAdapter.getPreviousView();
+//                            } else {
+//                                mScrollerPrevView = null;
+//                            }
+//
+//                            mScrollerCurView.getLocalVisibleRect(mVisiablRect);
+//                            Log.e("tt", "mScrollerCurView ===== " + mScrollerCurView);
+//
+//                            if (mVisiablRect.top < 0) {
+//                                deltaY = -mVisiablRect.top;
+//                            }
+
                             mScrollerCurView.scrollBy(0, deltaY);
                             if (mScrollerPrevView != null) {
                                 mScrollerPrevView.scrollBy(0, deltaY);
@@ -326,7 +394,7 @@ public class VerticalPageSlider extends BaseSlider {
                             if (mScrollerNextView != null) {
                                 mScrollerNextView.scrollBy(0, deltaY);
                             }
-                            Log.e("tt", "++++++++++++++++++++");
+//                            Log.e("tt", "++++++++++++++++++++");
                             moveAllDistance = 0;
                             return true;
                         }
