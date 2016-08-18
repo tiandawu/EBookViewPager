@@ -4,17 +4,17 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.BaseAdapter;
 import android.widget.TextView;
-
-import com.tiandawu.ebook.slider.VerticalPageSlider;
 
 public class MainActivity extends AppCompatActivity {
 
     private BookViewPager mBookViewPager;
+    private String[] datas = new String[5];
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,27 +23,39 @@ public class MainActivity extends AppCompatActivity {
         hideStatusBar(this);
         setContentView(R.layout.activity_main);
         mBookViewPager = (BookViewPager) findViewById(R.id.bookViewPager);
-        mBookViewPager.setAdapter(new MyAdapter());
-        mBookViewPager.setSlider(new VerticalPageSlider());
-        mBookViewPager.setOnTapListener(new BookViewPager.OnTapListener() {
-            @Override
-            public void onSingleTap(MotionEvent event) {
-                int screenWidth = getResources().getDisplayMetrics().widthPixels;
-                int x = (int) event.getX();
-                if (x > screenWidth / 2) {
-                    mBookViewPager.slideNext();
-//                    Log.e("tt", "++++++++");
-                } else if (x <= screenWidth / 2) {
-                    mBookViewPager.slidePrevious();
-//                    Log.e("tt", "---------");
-                }
-            }
-        });
+        for (int i = 0; i < 5; i++) {
+            datas[i] = "第" + i + "页";
+//            Log.e("tt", "data ===== " + datas[i]);
+        }
+
+        mBookViewPager.setListViewAdapter(new MyListAdapter());
+//        mBookViewPager.setAdapter(new MyAdapter());
+//        mBookViewPager.setSlider(new VerticalPageSlider());
+//        mBookViewPager.setOnTapListener(new BookViewPager.OnTapListener() {
+//            @Override
+//            public void onSingleTap(MotionEvent event) {
+//                int screenWidth = getResources().getDisplayMetrics().widthPixels;
+//                int x = (int) event.getX();
+//                if (x > screenWidth / 2) {
+//                    mBookViewPager.slideNext();
+////                    Log.e("tt", "++++++++");
+//                } else if (x <= screenWidth / 2) {
+//                    mBookViewPager.slidePrevious();
+////                    Log.e("tt", "---------");
+//                }
+//            }
+//        });
     }
 
     private class MyAdapter extends BookViewPagerAdapter<String> {
 
         private int index = 0;
+        private int count = 3;
+
+        @Override
+        public int getPages() {
+            return count;
+        }
 
         @Override
         public View getView(View convertView, String s) {
@@ -77,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public boolean hasNextContent() {
 //            Log.e("tt", "hasNextContent = " + index);
-            return index < 3;
+            return index < count;
         }
 
         @Override
@@ -110,5 +122,41 @@ public class MainActivity extends AppCompatActivity {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
     }
 
+
+    public class MyListAdapter extends BaseAdapter {
+
+
+        @Override
+        public int getCount() {
+            return datas.length;
+        }
+
+        @Override
+        public Object getItem(int i) {
+            return datas[i];
+        }
+
+        @Override
+        public long getItemId(int i) {
+            return i;
+        }
+
+        @Override
+        public View getView(int i, View view, ViewGroup viewGroup) {
+
+//            for (int n = 0; n < datas.length; n++) {
+//                Log.e("tt", "n = " + n);
+//                Log.e("tt", "data = " + datas[n]);
+//            }
+            Log.e("tt", "n = " + i);
+            Log.e("tt", "data = " + datas[i]);
+            if (view == null) {
+                view = View.inflate(MainActivity.this, R.layout.item_list, null);
+            }
+            TextView showText = (TextView) view.findViewById(R.id.show_text);
+            showText.setText(datas[i]);
+            return view;
+        }
+    }
 
 }

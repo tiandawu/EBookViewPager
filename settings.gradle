@@ -1,1 +1,1 @@
-include ':app', ':bookviewpager'
+include ':app', ':bookviewpager', ':ebookview'

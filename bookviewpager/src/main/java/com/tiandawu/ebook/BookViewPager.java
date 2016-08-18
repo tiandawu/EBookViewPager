@@ -1,6 +1,7 @@
 package com.tiandawu.ebook;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.v4.os.ParcelableCompat;
@@ -9,6 +10,8 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.ListView;
 
 import com.tiandawu.ebook.slider.Slider;
 
@@ -16,6 +19,8 @@ import com.tiandawu.ebook.slider.Slider;
  * Created by tiandawu on 2016/7/31.
  */
 public class BookViewPager extends ViewGroup {
+
+    private Context mContext;
 
     /**
      * 记录按下的X,Y
@@ -27,6 +32,8 @@ public class BookViewPager extends ViewGroup {
     private long mDownTime;
 
     private Slider mSlider;
+
+    private ListView mListView;
 
     private BookViewPagerAdapter mAdapter;
 
@@ -65,6 +72,42 @@ public class BookViewPager extends ViewGroup {
         resetFromAdapter();
         postInvalidate();
     }
+
+
+    /**
+     * 利用ListView垂直翻页
+     */
+    public void setListViewAdapter(BaseAdapter adapter) {
+        if (mContext == null) {
+            this.mContext = this.getContext();
+        }
+        if (mListView == null) {
+            mListView = new ListView(mContext);
+        }
+        this.addView(mListView);
+        mListView.setAdapter(adapter);
+    }
+
+    /**
+     * 利用ListView垂直翻页
+     *
+     * @param adapter 适配器
+     * @param divider       分割线
+     * @param dividerHeight 分割线的高度
+     */
+    public void setListViewAdapter(BaseAdapter adapter, Drawable divider, int dividerHeight) {
+        if (mContext == null) {
+            this.mContext = this.getContext();
+        }
+        if (mListView == null) {
+            mListView = new ListView(mContext);
+        }
+        this.addView(mListView);
+        mListView.setDivider(divider);
+        mListView.setDividerHeight(dividerHeight);
+        mListView.setAdapter(adapter);
+    }
+
 
     public BookViewPagerAdapter getAdapter() {
         return mAdapter;
