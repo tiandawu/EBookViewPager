@@ -4,10 +4,12 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <include layout="@layout/layout_titlebar" />
+
     <com.tiandawu.ebook.BookViewPager
-    android:id="@+id/bookViewPager"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent" />
+        android:id="@+id/bookViewPager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
 
 </LinearLayout>

@@ -221,11 +221,6 @@ public abstract class BookViewPagerAdapter<T> {
     }
 
 
-    /**
-     * 获取总页数
-     */
-    public abstract int getPages();
-
 
     public abstract View getView(View convertView, T t);
 
