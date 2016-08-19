@@ -20,7 +20,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        hideStatusBar(this);
+//        hideStatusBar(this);
         setContentView(R.layout.activity_main);
         mBookViewPager = (BookViewPager) findViewById(R.id.bookViewPager);
         for (int i = 0; i < 5; i++) {
@@ -143,13 +143,6 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public View getView(int i, View view, ViewGroup viewGroup) {
-
-//            for (int n = 0; n < datas.length; n++) {
-//                Log.e("tt", "n = " + n);
-//                Log.e("tt", "data = " + datas[n]);
-//            }
-            Log.e("tt", "n = " + i);
-            Log.e("tt", "data = " + datas[i]);
             if (view == null) {
                 view = View.inflate(MainActivity.this, R.layout.item_list, null);
             }
